@@ -88,8 +88,9 @@ namespace a2OEC.Controllers
             ViewData["CountryCode"] = new SelectList(_context.Country, "CountryCode", "CountryCode", province.CountryCode);
 
             //1b.display the country name in the drop down, ordered by name
-            ViewData["CountryNameSelectList"] = new SelectList(_context.Country, "Name", "Name"/*, province.CountryCodeNavigation.CountryCode*/);
+            ViewData["CountryName"] = new SelectList(_context.Country, "Name", "Name", province.CountryCode);
             return View(province);
+            /*, province.CountryCodeNavigation.CountryCode*/
         }
 
         // POST: ADProvince/Edit/5
@@ -108,6 +109,9 @@ namespace a2OEC.Controllers
             {
                 try
                 {
+                    /* province.CountryCode= _context.*/ //query database for country code that matches the passed in name
+
+                    //province.CountryCode = _context.Province.Include(p => p.CountryCode).Where(p => p.Name.Equals(province.Name));
                     _context.Update(province);
                     await _context.SaveChangesAsync();
                 }
@@ -124,7 +128,13 @@ namespace a2OEC.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["CountryCode"] = new SelectList(_context.Country, "CountryCode", "CountryCode", province.CountryCode);
+
+            //efind where country code == countrycode.name
+            //province.CountryCode = _context.Country.SingleOrDefault(c => c.Name province.CountryCode);
+            ViewData["CountryName"] = new SelectList(_context.Country.Include(c => c.CountryCode), "Name", "Name", province.CountryCode);
+
+
+            //ViewData["CountryCode"] = new SelectList(_context.Country, "CountryCode", "CountryCode", province.CountryCode);
             return View(province);
         }
 

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 //namespace containing modelmetadatatype attribute
 using Microsoft.AspNetCore.Mvc;
+// using System.ComponentModel.DataAnnotations???
 
 //1b.
 //took out Metadata at the end of Models.
