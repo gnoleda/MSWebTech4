@@ -61,18 +61,26 @@ namespace a2OEC.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("FarmId,Name,Address,Town,County,ProvinceCode,PostalCode,HomePhone,CellPhone,Email,Directions,DateJoined,LastContactDate")] Farm farm)
         {
-            if (ModelState.IsValid)
+            try
             {
-                //3d. if the insert works, place a msg in your temp data
-                TempData["message"] = "Farm insert was successful";
-                _context.Add(farm);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                if (ModelState.IsValid)
+                {
+                    //3d. if the insert works, place a msg in your temp data
+                    TempData["message"] = "Farm insert was successful";
+                    _context.Add(farm);
+                    await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(Index));
+                }
+                else
+                {
+                    //3c.add modelstate error
+                    ModelState.AddModelError("Name", "Error ");
+                }
             }
-            else
+            //3c
+            catch (Exception ex)
             {
-                //3c.add modelstate error
-                ModelState.AddModelError("Name", "Error ");
+                ModelState.AddModelError("", $"Error creating new item: {ex.GetBaseException().Message}");
             }
             ViewData["ProvinceCode"] = new SelectList(_context.Province, "ProvinceCode", "ProvinceCode", farm.ProvinceCode);
             return View(farm);
@@ -104,33 +112,44 @@ namespace a2OEC.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("FarmId,Name,Address,Town,County,ProvinceCode,PostalCode,HomePhone,CellPhone,Email,Directions,DateJoined,LastContactDate")] Farm farm)
         {
-            if (id != farm.FarmId)
+            try
             {
-                return NotFound();
-            }
+                if (id != farm.FarmId)
+                {
+                    return NotFound();
+                }
 
-            if (ModelState.IsValid)
+                if (ModelState.IsValid)
+                {
+                    try
+                    {
+                        //3d. if the insert works, place a msg in your temp data
+                        TempData["message"] = "Farm edit was successful";
+                        farm.ProvinceCode = _context.Province.SingleOrDefault(p => p.Name == farm.ProvinceCode.ToString()).ProvinceCode;
+                        _context.Update(farm);
+                        await _context.SaveChangesAsync();
+                    }
+                    catch (DbUpdateConcurrencyException)
+                    {
+                        if (!FarmExists(farm.FarmId))
+                        {
+                            return NotFound();
+                        }
+                        else
+                        {
+                            throw;
+                        }
+                    }
+                    return RedirectToAction(nameof(Index));
+                }
+            }
+            catch (Exception ex)
             {
-                try
-                {
-                    //3d. if the insert works, place a msg in your temp data
-                    TempData["message"] = "Farm edit was successful";
-                    farm.ProvinceCode = _context.Province.SingleOrDefault(p => p.Name == farm.ProvinceCode.ToString()).ProvinceCode;
-                    _context.Update(farm);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!FarmExists(farm.FarmId))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
+                //3c
+                //catch any exception that is thrown on Edit, place its innermost message into modelstate
+                //and allow processing to continue to the said path
+                //which should redisplay the users data with the error
+                ModelState.AddModelError("", $"Error inserting edit: {ex.GetBaseException().Message}");
             }
 
             ViewData["ProvinceCode"] = new SelectList(_context.Province, "ProvinceCode", "ProvinceCode", farm.ProvinceCode);
@@ -172,6 +191,7 @@ namespace a2OEC.Controllers
             }
             else
             {
+                //3ci
                 //put the innermost exception's message into TempData and return it to the delete view
                 TempData["message"] = "Farm delete unsuccessful";
                 return RedirectToAction("Delete", "ADFarm");
