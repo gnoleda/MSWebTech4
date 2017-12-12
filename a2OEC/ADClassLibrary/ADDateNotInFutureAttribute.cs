@@ -9,6 +9,6 @@ namespace ADClassLibrary
     //add a class called datenoinfutureattribute and have it extend validation class
     public class ADDateNotInFutureAttribute : ValidationAttribute
     {
-        public 
+        
     }
 }

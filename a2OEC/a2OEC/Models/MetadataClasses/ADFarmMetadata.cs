@@ -43,6 +43,8 @@ namespace a2OEC.Models
         [Display(Name = "Province")]
         public string ProvinceCode { get; set; }
         [Display(Name = "Postal Code")]
+        [RegularExpression(@"^[ABCEGHJKLMNPRSTVXYabceghjklmnprstvxy]\d[A-Za-z] ?\d[A-Za-z]\d$|^(\d{5}|\d{5}\-?\d{4})$", ErrorMessage ="Incorrect postal code format.")] //3bi/ii
+        //[RegularExpression(@"^(\d{5}|\d{5}\-\d{4})$", ErrorMessage = "Incorrect zip code format.")] //3ci
         public string PostalCode { get; set; }
         [Display(Name = "Home Phone")]
         public string HomePhone { get; set; }
