@@ -21,16 +21,21 @@ namespace ADClassLibrary
                 //change input string to lower case
                 //remove leading/trailing spaces
                 strInput.ToLower().Trim();
-                strInput.Substring(1);
+                //strInput.Substring(1);
 
                 //uppercase first letter of every word in the string
-                strInput = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(strInput);
+                string[] words = strInput.Split(' ');
+                foreach (var item in words)
+                {
+                    strInput = char.ToUpper(item[0]) + item.Substring(1) + ' ';
+                }
+
+                return strInput;
             }
 
-            return strInput;
         }
 
-        public bool ADPostalCodeValidation(string pcInput)
+        public bool ADPostalCodeValidation(ref string pcInput)
         {
             bool isPCValid = true;
 
@@ -54,17 +59,22 @@ namespace ADClassLibrary
             return isPCValid;
         }
 
-        public bool ADZipCodeValidation(string zipInput)
+        public bool ADZipCodeValidation(ref string zipInput)
         {
             bool isZipValid = true;
 
+            //if it contains 5 digits, return true, alogn with 5 digits without punctuation
             if (zipInput.Length == 5)
             {
-                
-            }
-            else if(zipInput.Length == 9)
-            {
 
+            }
+            else if (zipInput.Length == 9 || zipInput.Length == 10)//10 to account for the dash
+            {
+                //3c.iv along with the digits in the format 12345-1234
+                if (zipInput.IndexOf("-") != 5)
+                {
+                    zipInput = zipInput.Insert(5, "-");
+                }
             }
             else
             {
