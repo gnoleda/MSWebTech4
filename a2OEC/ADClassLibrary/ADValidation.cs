@@ -9,9 +9,16 @@ namespace ADClassLibrary
 {
     public class ADValidation : ValidationAttribute
     {
-        public string ADCapitalize(string strInput)
+        public static string ADCapitalize(string strInput)
         {
             //3ai if the string is null, return it unchanged
+            //change to capitals
+            if(strInput.Length == 2)//if it is a province code
+            {
+                strInput.ToUpper();
+                return strInput;
+            }
+
             if (strInput == null)
             {
                 return strInput;
@@ -33,9 +40,10 @@ namespace ADClassLibrary
                 return strInput;
             }
 
+
         }
 
-        public bool ADPostalCodeValidation(ref string pcInput)
+        public static bool ADPostalCodeValidation(ref string pcInput)
         {
             bool isPCValid = true;
 
@@ -59,7 +67,7 @@ namespace ADClassLibrary
             return isPCValid;
         }
 
-        public bool ADZipCodeValidation(ref string zipInput)
+        public static bool ADZipCodeValidation(ref string zipInput)
         {
             bool isZipValid = true;
 

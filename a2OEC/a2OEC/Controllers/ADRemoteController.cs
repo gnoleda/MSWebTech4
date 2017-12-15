@@ -22,23 +22,22 @@ namespace a2OEC.Controllers
         {
             try
             {
+                //search database for the province code
+                var provinceCode = _context.Province.SingleOrDefault(p => p.ProvinceCode == ProvinceCode);
+
                 //it must be exactly 2 letters long (not just any characters)
-                Regex pcPattern = new Regex(@"^[a-z]{2}$");
+                Regex pcPattern = new Regex(@"^[a-z]{2}$", RegexOptions.IgnoreCase);
+
                 if (!pcPattern.IsMatch(ProvinceCode))
                 {
                     return Json("Province code should be two letters.");
                 }
-                if (pcPattern.IsMatch(ProvinceCode))
+                //it must be on file in the province table
+                if (provinceCode == null)
                 {
-                    //search database for the province code
-                    var provinceCode = _context.Province.SingleOrDefault(p => p.ProvinceCode == ProvinceCode);
-
-                    //it must be on file in the province table
-                    if (provinceCode == null)
-                    {
-                        return Json("Province code does not exist.");
-                    }
+                    return Json("Province code does not exist.");
                 }
+
             }
             catch (Exception ex)
             {

@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 // the using below is to enable the addition of annotations
 using System.ComponentModel.DataAnnotations;
 using ADClassLibrary;
+using System.Text.RegularExpressions;
 
 //1b.
 
@@ -22,42 +23,37 @@ namespace a2OEC.Models
     //validating model by implementing the Ivariableobject interface
     public partial class Farm : IValidatableObject
     {
-        private readonly OECContext _context;
-
-        //public ADFarmMetadata(OECContext context)
-        //{
-        //    _context = context;
-        //}
-
         //1dii creates a validate method
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
-            ADClassLibrary.ADValidation adValidation = new ADClassLibrary.ADValidation();
+            //ADClassLibrary.ADValidation adValidation = new ADClassLibrary.ADValidation();
+            OECContext _context = OEC_Singleton.Context();
 
             //trimm all strings of leading and trailing spaces
             if (Name != null)
             {
                 Name = Name.Trim();
-                Name = adValidation.ADCapitalize(Name);
+                Name = ADValidation.ADCapitalize(Name);
             }
             if (Address != null)
             {
                 Address = Address.Trim();
-                Address = adValidation.ADCapitalize(Address);
+                Address = ADValidation.ADCapitalize(Address);
             }
             if(Town != null)
             {
                 Town = Town.Trim();
-                Town = adValidation.ADCapitalize(Town);
+                Town = ADValidation.ADCapitalize(Town);
             }
             if(County != null)
             {
                 County = County.Trim();
-                County = adValidation.ADCapitalize(County);
+                County = ADValidation.ADCapitalize(County);
             }
             if(ProvinceCode != null)
             {
                 ProvinceCode = ProvinceCode.Trim();
+                ADValidation.ADCapitalize(ProvinceCode);
             }
             if(PostalCode != null)
             {
@@ -94,10 +90,43 @@ namespace a2OEC.Models
             //if postal code provided, validate and format it using postalcodevalidation or zipcode validation, depending which country
             if (!String.IsNullOrWhiteSpace(PostalCode))
             {
-                var provinceCode = _context.Province.SingleOrDefault(p => p.ProvinceCode == ProvinceCode);
-                var countryCode = _context.Province.SingleOrDefault
+                var countryCode = _context.Province.SingleOrDefault(p => p.ProvinceCode == ProvinceCode).CountryCode;
 
-                if 
+                string postalCode = PostalCode;
+                if (countryCode == "CA")
+                {
+                    ADValidation.ADPostalCodeValidation(ref postalCode);
+                    PostalCode = postalCode;
+                }
+                if (countryCode == "US")
+                {
+                    ADValidation.ADZipCodeValidation(ref postalCode);
+                    PostalCode = postalCode;
+                }
+               
+            }
+
+            //either home phone or cellphone must be provided
+            if(String.IsNullOrWhiteSpace(HomePhone) && String.IsNullOrWhiteSpace(CellPhone))
+            {
+                yield return new ValidationResult("You must provide either your cell or home phone number.");
+            }
+            
+            //ignore punctuation or text
+            if(!String.IsNullOrWhiteSpace(HomePhone))
+            {
+                //remove any letters/punctuation
+                Regex.Replace(HomePhone, "[^A-Za-z.+=-/\'':;]","");
+
+                //must contain only 10 digits
+                if (!Regex.IsMatch(HomePhone, @"^[0-9]{10}$"))
+                {
+                    yield return new ValidationResult("Phone number must be 10 digits long.");
+                }
+                if(Regex.IsMatch(HomePhone, @"^[0-9]{10}$"))
+                {
+                    String.Format("{0:###-###-####}", HomePhone);
+                }
             }
 
             //1diii replace the throw statement 
