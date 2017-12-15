@@ -85,12 +85,11 @@ namespace a2OEC.Controllers
             }
 
             //
-            ViewData["CountryCode"] = new SelectList(_context.Country, "CountryCode", "CountryCode", province.CountryCode);
-
+            //ViewData["CountryCode"] = new SelectList(_context.Country, "CountryCode", "CountryCode", province.CountryCode);
+            string name = province.CountryCode = _context.Country.SingleOrDefault(p => p.CountryCode == province.CountryCode.ToString()).Name;
+            ViewData["CountryName"] = new SelectList(_context.Country.OrderBy( x => x.Name), "Name", "Name", name);
             //1b.display the country name in the drop down, ordered by name
-            ViewData["CountryName"] = new SelectList(_context.Country, "Name", "Name", province.CountryCode);
             return View(province);
-            /*, province.CountryCodeNavigation.CountryCode*/
         }
 
         // POST: ADProvince/Edit/5
@@ -109,9 +108,7 @@ namespace a2OEC.Controllers
             {
                 try
                 {
-                    /* province.CountryCode= _context.*/ //query database for country code that matches the passed in name
-
-                    //province.CountryCode = _context.Province.Include(p => p.CountryCode).Where(p => p.Name.Equals(province.Name));
+                    province.CountryCode = _context.Country.SingleOrDefault(c => c.Name == province.CountryCode).CountryCode;
                     _context.Update(province);
                     await _context.SaveChangesAsync();
                 }
@@ -129,12 +126,8 @@ namespace a2OEC.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            //efind where country code == countrycode.name
-            //province.CountryCode = _context.Country.SingleOrDefault(c => c.Name province.CountryCode);
-            ViewData["CountryName"] = new SelectList(_context.Country.Include(c => c.CountryCode), "Name", "Name", province.CountryCode);
-
-
-            //ViewData["CountryCode"] = new SelectList(_context.Country, "CountryCode", "CountryCode", province.CountryCode);
+            string name = province.CountryCode = _context.Country.SingleOrDefault(p => p.CountryCode == province.CountryCode.ToString()).Name;
+            ViewData["CountryName"] = new SelectList(_context.Country.OrderBy(x => x.Name), "Name", "Name", name);
             return View(province);
         }
 

@@ -53,7 +53,6 @@ namespace a2OEC.Models
             {
                 ProvinceCode = ProvinceCode.Trim();
                 ProvinceCode = ProvinceCode.ToUpper();
-                //ADValidation.ADCapitalize(ProvinceCode);
             }
             if(PostalCode != null)
             {
@@ -176,8 +175,7 @@ namespace a2OEC.Models
             {
                 yield return new ValidationResult("Last contact date can not be prior to date joined.");
             }
-
-
+            
             //1diii replace the throw statement 
             yield return ValidationResult.Success;
             //throw new NotImplementedException();
@@ -200,8 +198,6 @@ namespace a2OEC.Models
         [Remote("ProvinceCodeValidation","ADRemote")] //use remote annon 2.h
         public string ProvinceCode { get; set; }
         [Display(Name = "Postal Code")]
-        //[RegularExpression(@"^[ABCEGHJKLMNPRSTVXYabceghjklmnprstvxy]\d[A-Za-z] ?\d[A-Za-z]\d$|^(\d{5}|\d{5}\-?\d{4})$", ErrorMessage ="Postal (zip) Code is not a valid pattern.")] //3bi/ii
-        //[RegularExpression(@"^(\d{5}|\d{5}\-\d{4})$", ErrorMessage = "Incorrect zip code format.")] //3ci
         public string PostalCode { get; set; }
         [Display(Name = "Home Phone")]
         [RegularExpression(@"^\d{3}-\d{3}-\d{4}$", ErrorMessage = "Home phone is an incorrect pattern: 123-123-1234")]

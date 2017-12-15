@@ -35,7 +35,7 @@ namespace ADClassLibrary
 
             postalCode = Regex.Replace(postalCode, @"[^\w\s]", "");
             Regex pattern = new Regex(@"[ABCEGHJKLMNPRSTVXY]\d[ABCEGHJKLMNPRSTVWXYZ] ?\d[ABCEGHJKLMNPRSTVWXYZ]\d", RegexOptions.IgnoreCase);
-            if(postalCode != null || postalCode !="")
+            if(postalCode != null || postalCode.Trim() !="")
             {
                 if (!pattern.IsMatch(postalCode))
                 {
@@ -53,7 +53,7 @@ namespace ADClassLibrary
 
         public static bool ADZipCodeValidation(ref string zipCode)
         {
-            if (zipCode != null || zipCode != "")
+            if (zipCode != null || zipCode.Trim() != "")
             {
                 zipCode = Regex.Replace(zipCode, @"[^\w\s]", ""); //remove punctuation
                 Regex pattern = new Regex(@"\d{5}(-\d{4})?", RegexOptions.IgnoreCase);
