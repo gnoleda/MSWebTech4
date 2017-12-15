@@ -12,12 +12,6 @@ namespace ADClassLibrary
         public static string ADCapitalize(string strInput)
         {
             //3ai if the string is null, return it unchanged
-            //change to capitals
-            if(strInput.Length == 2)//if it is a province code
-            {
-                strInput.ToUpper();
-                return strInput;
-            }
 
             if (strInput == null)
             {
@@ -25,11 +19,6 @@ namespace ADClassLibrary
             }
             else
             {
-                //change input string to lower case
-                //remove leading/trailing spaces
-                strInput.ToLower().Trim();
-                //strInput.Substring(1);
-
                 //uppercase first letter of every word in the string
                 string[] words = strInput.Split(' ');
                 foreach (var item in words)
@@ -39,57 +28,44 @@ namespace ADClassLibrary
 
                 return strInput;
             }
-
-
         }
 
-        public static bool ADPostalCodeValidation(ref string pcInput)
+        public static bool ADPostalCodeValidation(ref string postalCode)
         {
-            bool isPCValid = true;
 
-            if (pcInput == null || pcInput == "")
+            postalCode = Regex.Replace(postalCode, @"[^\w\s]", "");
+            Regex pattern = new Regex(@"[ABCEGHJKLMNPRSTVXY]\d[ABCEGHJKLMNPRSTVWXYZ] ?\d[ABCEGHJKLMNPRSTVWXYZ]\d", RegexOptions.IgnoreCase);
+            if(postalCode != null || postalCode !="")
             {
-                pcInput.ToUpper();//3bv.
-            }
-            else if (pcInput != null)
-            {
-                //3bv (insert space)
-                for (int i = 3; i < pcInput.Length; i += 3)
+                if (!pattern.IsMatch(postalCode))
                 {
-                    pcInput = pcInput.Insert(i, " ");
+                    return false;
                 }
-            }          
-            else
-            {
-                isPCValid = false;
-            }
-
-            return isPCValid;
-        }
-
-        public static bool ADZipCodeValidation(ref string zipInput)
-        {
-            bool isZipValid = true;
-
-            //if it contains 5 digits, return true, alogn with 5 digits without punctuation
-            if (zipInput.Length == 5)
-            {
-
-            }
-            else if (zipInput.Length == 9 || zipInput.Length == 10)//10 to account for the dash
-            {
-                //3c.iv along with the digits in the format 12345-1234
-                if (zipInput.IndexOf("-") != 5)
+                else
                 {
-                    zipInput = zipInput.Insert(5, "-");
+                    postalCode = postalCode.ToUpper();
+                    postalCode = Regex.Replace(postalCode, @"^(...)(...)", "$1 $2");
                 }
             }
-            else
-            {
-                isZipValid = false;
-            }
 
-            return isZipValid;
+            return true;
         }
+
+        public static bool ADZipCodeValidation(ref string zipCode)
+        {
+            if (zipCode != null || zipCode != "")
+            {
+                zipCode = Regex.Replace(zipCode, @"[^\w\s]", ""); //remove punctuation
+                Regex pattern = new Regex(@"\d{5}(-\d{4})?", RegexOptions.IgnoreCase);
+
+                if (!pattern.IsMatch(zipCode))
+                {
+                    return false;
+                }
+            }
+            
+            return true;
+        }
+
     }
 }

@@ -26,46 +26,38 @@ namespace a2OEC.Models
         //1dii creates a validate method
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
-            //ADClassLibrary.ADValidation adValidation = new ADClassLibrary.ADValidation();
             OECContext _context = OEC_Singleton.Context();
 
             //trimm all strings of leading and trailing spaces
             if (Name != null)
             {
-                Name = Name.Trim();
+                Name = Name.ToLower().Trim();
                 Name = ADValidation.ADCapitalize(Name);
             }
             if (Address != null)
             {
-                Address = Address.Trim();
+                Address = Address.ToLower().Trim();
                 Address = ADValidation.ADCapitalize(Address);
             }
             if(Town != null)
             {
-                Town = Town.Trim();
+                Town = Town.ToLower().Trim();
                 Town = ADValidation.ADCapitalize(Town);
             }
             if(County != null)
             {
-                County = County.Trim();
+                County = County.ToLower().Trim();
                 County = ADValidation.ADCapitalize(County);
             }
             if(ProvinceCode != null)
             {
                 ProvinceCode = ProvinceCode.Trim();
-                ADValidation.ADCapitalize(ProvinceCode);
+                ProvinceCode = ProvinceCode.ToUpper();
+                //ADValidation.ADCapitalize(ProvinceCode);
             }
             if(PostalCode != null)
             {
                 PostalCode = PostalCode.Trim();
-            }
-            if (HomePhone != null)
-            {
-                HomePhone = HomePhone.Trim();
-            }
-            if(CellPhone != null)
-            {
-                CellPhone = CellPhone.Trim();
             }
             if (Email != null)
             {
@@ -79,29 +71,53 @@ namespace a2OEC.Models
             //either the town or country must be provided
             if(String.IsNullOrWhiteSpace(Town) && String.IsNullOrWhiteSpace(County))
             {
-                yield return new ValidationResult("You must fill in either Town and/or County fields");
+                yield return new ValidationResult("At least one town or country must be provided.");
             }
 
             if(String.IsNullOrWhiteSpace(Email))
             {
-                yield return new ValidationResult("You must provide an address and postal code.");
+                if(String.IsNullOrWhiteSpace(Address) || String.IsNullOrWhiteSpace(PostalCode))
+                {
+                    yield return new ValidationResult("If no email, you must provide an address and postal code.");
+                }                
             }
 
             //if postal code provided, validate and format it using postalcodevalidation or zipcode validation, depending which country
             if (!String.IsNullOrWhiteSpace(PostalCode))
             {
-                var countryCode = _context.Province.SingleOrDefault(p => p.ProvinceCode == ProvinceCode).CountryCode;
+                if(!String.IsNullOrWhiteSpace(ProvinceCode))
+                {
+                    var countryCode = "";
 
-                string postalCode = PostalCode;
-                if (countryCode == "CA")
-                {
-                    ADValidation.ADPostalCodeValidation(ref postalCode);
-                    PostalCode = postalCode;
-                }
-                if (countryCode == "US")
-                {
-                    ADValidation.ADZipCodeValidation(ref postalCode);
-                    PostalCode = postalCode;
+                    if (ProvinceCode.Length == 2)
+                    {
+                        countryCode = _context.Province.SingleOrDefault(p => p.ProvinceCode == ProvinceCode).CountryCode;
+                    }
+                    else
+                    {
+                        countryCode =_context.Province.SingleOrDefault(p => p.Name == ProvinceCode).CountryCode;
+                    }
+                    
+                    string postalCode = PostalCode;
+                    if (countryCode == "CA")
+                    {
+                        if (!ADValidation.ADPostalCodeValidation(ref postalCode))
+                        {
+                            yield return new ValidationResult("Postal Code is not a valid pattern (N5G 6Z6)", new string[] { nameof(PostalCode) });
+                        }
+                        else
+                        {
+                            PostalCode = postalCode;
+                        }
+                    }
+                    if (countryCode == "US")
+                    {
+                        if(!ADValidation.ADZipCodeValidation(ref postalCode))
+                        {
+                            yield return new ValidationResult("Zip Code is not a valid pattern (12345 or 12345-1234)", new string[] { nameof(PostalCode) });
+                        }
+                        PostalCode = postalCode;
+                    }
                 }
                
             }
@@ -111,23 +127,56 @@ namespace a2OEC.Models
             {
                 yield return new ValidationResult("You must provide either your cell or home phone number.");
             }
-            
-            //ignore punctuation or text
-            if(!String.IsNullOrWhiteSpace(HomePhone))
+            else
             {
-                //remove any letters/punctuation
-                Regex.Replace(HomePhone, "[^A-Za-z.+=-/\'':;]","");
+                Regex pattern = new Regex(@"\d{10}", RegexOptions.IgnoreCase);
 
-                //must contain only 10 digits
-                if (!Regex.IsMatch(HomePhone, @"^[0-9]{10}$"))
+                if (!String.IsNullOrWhiteSpace(HomePhone))
                 {
-                    yield return new ValidationResult("Phone number must be 10 digits long.");
+                    //get rid of all punctuation and trim and space
+                    HomePhone = Regex.Replace(HomePhone, @"[^\w\s]", "").Trim();
+                    HomePhone = Regex.Replace(HomePhone, "[^0-9]", "");
+
+                    if(!pattern.IsMatch(HomePhone))
+                    {
+                        yield return new ValidationResult("Home phone is incorrect pattern: ", new string[] { nameof(HomePhone) });
+                    }
+                    else
+                    {
+                        //insert dashes into phone number
+                        HomePhone = Regex.Replace(HomePhone, @"^(...)(...)(....)$", "$1-$2-$3");
+                    }
                 }
-                if(Regex.IsMatch(HomePhone, @"^[0-9]{10}$"))
+
+                if (!String.IsNullOrWhiteSpace(CellPhone))
                 {
-                    String.Format("{0:###-###-####}", HomePhone);
+                    //get rid of all punctuation and trim and space
+                    CellPhone = Regex.Replace(CellPhone, @"[^\w\s]", "").Trim();
+                    CellPhone = Regex.Replace(CellPhone, "[^0-9]", "");
+
+                    if (!pattern.IsMatch(CellPhone))
+                    {
+                        yield return new ValidationResult("Cell phone is incorrect pattern: ", new string[] { nameof(CellPhone) });
+                    }
+                    else
+                    {
+                        //insert dashes into phone number
+                        CellPhone = Regex.Replace(CellPhone, @"^(...)(...)(....)$", "$1-$2-$3");
+                    }
                 }
             }
+
+            //lastcontact date cantbe provided unless datejoined 
+            if (LastContactDate != null && DateJoined == null)
+            {
+                yield return new ValidationResult("You must also provide Date Joined.", new string[] { nameof(DateJoined) });
+            }
+            //last contact date cant be before date joined
+            if (DateJoined > LastContactDate)
+            {
+                yield return new ValidationResult("Last contact date can not be prior to date joined.");
+            }
+
 
             //1diii replace the throw statement 
             yield return ValidationResult.Success;
@@ -151,21 +200,27 @@ namespace a2OEC.Models
         [Remote("ProvinceCodeValidation","ADRemote")] //use remote annon 2.h
         public string ProvinceCode { get; set; }
         [Display(Name = "Postal Code")]
-        [RegularExpression(@"^[ABCEGHJKLMNPRSTVXYabceghjklmnprstvxy]\d[A-Za-z] ?\d[A-Za-z]\d$|^(\d{5}|\d{5}\-?\d{4})$", ErrorMessage ="Incorrect postal code format.")] //3bi/ii
+        //[RegularExpression(@"^[ABCEGHJKLMNPRSTVXYabceghjklmnprstvxy]\d[A-Za-z] ?\d[A-Za-z]\d$|^(\d{5}|\d{5}\-?\d{4})$", ErrorMessage ="Postal (zip) Code is not a valid pattern.")] //3bi/ii
         //[RegularExpression(@"^(\d{5}|\d{5}\-\d{4})$", ErrorMessage = "Incorrect zip code format.")] //3ci
         public string PostalCode { get; set; }
         [Display(Name = "Home Phone")]
+        [RegularExpression(@"^\d{3}-\d{3}-\d{4}$", ErrorMessage = "Home phone is an incorrect pattern: 123-123-1234")]
         public string HomePhone { get; set; }
         [Display(Name = "Cell Phone")]
+        [RegularExpression(@"^\d{3}-\d{3}-\d{4}$", ErrorMessage = "Cell phone is an incorrect pattern: 123-123-1234")]
         public string CellPhone { get; set; }
         [DataType(DataType.EmailAddress)]
         public string Email { get; set; }
         public string Directions { get; set; }
         [Display(Name = "Date Joined")]
+        [ADDateNotInFuture]
+        [DisplayFormat(ApplyFormatInEditMode = true,DataFormatString ="{0:dd MMM yyy}")]
         public DateTime? DateJoined { get; set; }
         [Display(Name = "Last Contact")]
+        [ADDateNotInFuture]
+        [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:dd MMM yyy}")]
         public DateTime? LastContactDate { get; set; }
-        [Display(Name = "Province Code")]
+        [Display(Name = "Province Name")]
         public Province ProvinceCodeNavigation { get; set; }
         public ICollection<Plot> Plot { get; set; }
     }

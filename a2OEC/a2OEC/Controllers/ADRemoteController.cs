@@ -25,6 +25,14 @@ namespace a2OEC.Controllers
                 //search database for the province code
                 var provinceCode = _context.Province.SingleOrDefault(p => p.ProvinceCode == ProvinceCode);
 
+                if (ProvinceCode == "Ontario" || ProvinceCode == "Alberta" || ProvinceCode == "British Columbia" || ProvinceCode == "Manitoba"
+                    || ProvinceCode == "Saskatchewan" || ProvinceCode == "Quebec" || ProvinceCode == "Newfoundland and Labrador" || ProvinceCode == "Nova Scotia"
+                    || ProvinceCode == "New Brunswick" || ProvinceCode == "Ontario" || ProvinceCode == "Prince Edward Island" || ProvinceCode == "Nunavut"
+                    || ProvinceCode == "Northwest Territories" || ProvinceCode == "Yukon" || ProvinceCode == "Michigan")
+                {
+                    return Json(true);
+                }
+
                 //it must be exactly 2 letters long (not just any characters)
                 Regex pcPattern = new Regex(@"^[a-z]{2}$", RegexOptions.IgnoreCase);
 

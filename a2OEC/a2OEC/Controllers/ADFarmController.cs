@@ -66,15 +66,15 @@ namespace a2OEC.Controllers
                 if (ModelState.IsValid)
                 {
                     //3d. if the insert works, place a msg in your temp data
-                    TempData["message"] = "Farm insert was successful";
                     _context.Add(farm);
                     await _context.SaveChangesAsync();
+                    TempData["message"] = "Farm insert was successful";
                     return RedirectToAction(nameof(Index));
                 }
                 else
                 {
                     //3c.add modelstate error
-                    ModelState.AddModelError("Name", "Error ");
+                    ModelState.AddModelError("Name", "Name Error");
                 }
             }
             //3c
@@ -124,10 +124,10 @@ namespace a2OEC.Controllers
                     try
                     {
                         //3d. if the insert works, place a msg in your temp data
-                        TempData["message"] = "Farm edit was successful";
                         farm.ProvinceCode = _context.Province.SingleOrDefault(p => p.Name == farm.ProvinceCode.ToString()).ProvinceCode;
                         _context.Update(farm);
                         await _context.SaveChangesAsync();
+                        TempData["message"] = "Farm edit was successful";
                     }
                     catch (DbUpdateConcurrencyException)
                     {
@@ -151,8 +151,8 @@ namespace a2OEC.Controllers
                 //which should redisplay the users data with the error
                 ModelState.AddModelError("", $"Error inserting edit: {ex.GetBaseException().Message}");
             }
-
-            ViewData["ProvinceCode"] = new SelectList(_context.Province, "ProvinceCode", "ProvinceCode", farm.ProvinceCode);
+            //3b.to display the province name, not code, in the drop down
+            ViewData["ProvinceSelectList"] = new SelectList(_context.Province, "Name", "Name", farm.Name);
             return View(farm);
         }
 

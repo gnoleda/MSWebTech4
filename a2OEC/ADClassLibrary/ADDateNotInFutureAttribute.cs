@@ -9,15 +9,20 @@ namespace ADClassLibrary
     //add a class called datenoinfutureattribute and have it extend validation class
     public class ADDateNotInFutureAttribute : ValidationAttribute
     {
-        //protected override ValidationResult IsValid(object value, ValidationContext validationContext)
-        //{
-        //    if (value != null && (value.ToString().Split(' ').Length > MaxWords ||
-        //                          value.ToString().Split(' ').Length < MinWords))
-        //        return new ValidationResult(
-        //            String.Format(ErrorMessage, validationContext.DisplayName, MaxWords, MinWords));
-        //    else
-        //        return ValidationResult.Success;
-        //}
+        public  ADDateNotInFutureAttribute()
+        {
+            ErrorMessage = "{0} cannot be in the future.";
+        }
+
+        protected override ValidationResult IsValid(object value, ValidationContext validationContext)
+        {
+            DateTime date = Convert.ToDateTime(value);
+            if (date > DateTime.Now)
+                return new ValidationResult(
+                    String.Format(ErrorMessage, validationContext.DisplayName));
+            else
+                return ValidationResult.Success;
+        }
 
     }
 }
