@@ -216,7 +216,7 @@ namespace a2OEC.Models
         [ADDateNotInFuture]
         [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:dd MMM yyy}")]
         public DateTime? LastContactDate { get; set; }
-        [Display(Name = "Province Name")]
+        [Display(Name = "Province")]
         public Province ProvinceCodeNavigation { get; set; }
         public ICollection<Plot> Plot { get; set; }
     }

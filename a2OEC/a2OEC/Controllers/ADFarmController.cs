@@ -101,7 +101,7 @@ namespace a2OEC.Controllers
             }
 
             //3b.to display the province name, not code, in the drop down
-            ViewData["ProvinceSelectList"] = new SelectList(_context.Province, "Name", "Name", farm.Name);
+            ViewData["ProvinceSelectList"] = new SelectList(_context.Province, "ProvinceCode", "Name", farm.ProvinceCode);
             return View(farm);
         }
 
@@ -124,7 +124,7 @@ namespace a2OEC.Controllers
                     try
                     {
                         //3d. if the insert works, place a msg in your temp data
-                        farm.ProvinceCode = _context.Province.SingleOrDefault(p => p.Name == farm.ProvinceCode.ToString()).ProvinceCode;
+                        //farm.ProvinceCode = _context.Province.SingleOrDefault(p => p.Name == farm.ProvinceCode.ToString()).ProvinceCode;
                         _context.Update(farm);
                         await _context.SaveChangesAsync();
                         TempData["message"] = "Farm edit was successful";
@@ -152,7 +152,7 @@ namespace a2OEC.Controllers
                 ModelState.AddModelError("", $"Error inserting edit: {ex.GetBaseException().Message}");
             }
             //3b.to display the province name, not code, in the drop down
-            ViewData["ProvinceSelectList"] = new SelectList(_context.Province, "Name", "Name", farm.Name);
+            ViewData["ProvinceSelectList"] = new SelectList(_context.Province, "ProvinceCode", "Name", farm.ProvinceCode);
             return View(farm);
         }
 

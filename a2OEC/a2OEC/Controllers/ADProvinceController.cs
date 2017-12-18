@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using a2OEC.Models;
+using Microsoft.AspNetCore.Http;
 
 namespace a2OEC.Controllers
 {
@@ -19,7 +20,7 @@ namespace a2OEC.Controllers
         }
 
         // GET: ADProvince
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string id)
         {
             var oECContext = _context.Province.Include(p => p.CountryCodeNavigation);
             return View(await oECContext.ToListAsync());
