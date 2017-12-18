@@ -32,7 +32,8 @@ namespace ADClassLibrary
 
         public static bool ADPostalCodeValidation(ref string postalCode)
         {
-
+            //get rid of space
+            postalCode = Regex.Replace(postalCode, @" ", "");
             postalCode = Regex.Replace(postalCode, @"[^\w\s]", "");
             Regex pattern = new Regex(@"[ABCEGHJKLMNPRSTVXY]\d[ABCEGHJKLMNPRSTVWXYZ] ?\d[ABCEGHJKLMNPRSTVWXYZ]\d", RegexOptions.IgnoreCase);
             if(postalCode != null || postalCode.Trim() !="")

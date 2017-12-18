@@ -182,11 +182,11 @@ namespace a2OEC.Controllers
         {
             if(ModelState.IsValid)
             {
-                //3d. if the insert works, place a msg in your temp data
-                TempData["message"] = "Farm delete was successful";
                 var farm = await _context.Farm.SingleOrDefaultAsync(m => m.FarmId == id);
                 _context.Farm.Remove(farm);
                 await _context.SaveChangesAsync();
+                //3d. if the insert works, place a msg in your temp data
+                TempData["message"] = "Farm delete was successful";
                 return RedirectToAction(nameof(Index));
             }
             else
